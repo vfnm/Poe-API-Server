@@ -33,7 +33,7 @@ Installation guide:
 Use with SillyTavern:
 1. Select Chat Completion API
 2. Open the settings and enter 'http://[IP:Port]/v2/driver/sage' in 'Alternative server URL'. Replace IP and port with the real value
-2. Go to the connection tab and enter your 'p_b_cookie' and 'bot_name' in 'OpenAI API key', using this format: p_b_cookie|bot_name
+2. Go to the connection tab and enter your 'p_b_cookie' and 'bot_name' in 'OpenAI API key', using this format: p_b_cookie|bot_name(add "|YES" to enable alternative way of sending messages
 3. Click Connect
 
 Currently it does not support streaming, chunking or a jailbreak (I recommend using a jailbroken bot or creating one yourself).
