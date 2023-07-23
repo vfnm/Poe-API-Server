@@ -18,9 +18,14 @@ def chat_completions():
 
 @app.route("/v2/driver/sage/models", methods=["GET"])
 def models():
-    p_b_cookie, bot_name = request.authorization.token.split('|', 1)
+    l = request.authorization.token.split('|')
+    p_b_cookie = l[0]
+    bot_name = l[1]
+    alt_send = False
+    if (len(l) > 2):
+        alt_send = True if l[2] == "YES" else False
     
-    bot.start_driver(p_b_cookie, bot_name)
+    bot.start_driver(p_b_cookie, bot_name, alt_send)
     return {
         "id" : "1"
     }
@@ -67,6 +72,18 @@ def abort_message():
 @app.route("/is-generating", methods=["GET"])
 def is_generating():
     return {"is_generating": bot.is_generating()}
+
+@app.route("/edit-bot-prompt", methods=["POST"])
+def edit_bot_prompt():
+    message = request.json.get("prompt")
+    bot.send_message(message)
+    return {"status": "Prompt edited"}
+
+@app.route("/edit-bot-intro", methods=["POST"])
+def edit_bot_intro():
+    message = request.json.get("prompt")
+    bot.send_message(message)
+    return {"status": "Intro edited"}
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
