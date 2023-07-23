@@ -58,7 +58,7 @@ class ChatBot:
 
     def is_generating(self):
         stop_button_elements = self.driver.find_elements(By.CLASS_NAME, "ChatStopMessageButton_stopButton__LWNj6")
-        return len(stop_button_elements) > 0
+        return len(stop_button_elements) > 0 or len(self.get_latest_message()) < 10
     
     def get_suggestions(self):
         suggestions_container = self.driver.find_elements(By.CLASS_NAME, "ChatMessageSuggestedReplies_suggestedRepliesContainer__JgW12")
