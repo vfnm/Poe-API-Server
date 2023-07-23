@@ -26,7 +26,6 @@ class ChatBot:
         renderer="Intel Iris OpenGL Engine",
         fix_hairline=True,
         )
-        
         self.driver.get(f"https://poe.com/")
         self.driver.add_cookie({"name": "p-b", "value": p_b_cookie})
         self.driver.get(f"https://poe.com/{bot_name}")

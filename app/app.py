@@ -1,20 +1,29 @@
-from flask import Flask, request
+from flask import Flask, request, Response
 from chatbot import ChatBot
 from openaihelper import OpenAIHelper
+import json
+#import logging
 
 app = Flask(__name__)
 
 bot = ChatBot()
 
 oai_helper = OpenAIHelper(bot)
+#logging.basicConfig(level=logging.DEBUG)
 
 @app.route("/v2/driver/sage/chat/completions", methods=["POST"])
 def chat_completions():
     data = request.get_json()
     messages = data.get('messages', [])
     
-    response = oai_helper.generate_completions(messages)
-    return response
+    if request.json.get("stream") is True:
+        def stream():
+            oai_helper.send_message(messages)
+            for completion in oai_helper.generate_completions_stream():
+                yield f"data: {json.dumps(completion)}\n\n"
+        return Response(stream(), mimetype='text/event-stream')
+    else:
+        return oai_helper.generate_completions(messages)
 
 @app.route("/v2/driver/sage/models", methods=["GET"])
 def models():

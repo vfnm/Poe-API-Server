@@ -36,5 +36,5 @@ Use with SillyTavern:
 2. Go to the connection tab and enter your 'p_b_cookie' and 'bot_name' in 'OpenAI API key', using this format: p_b_cookie|bot_name
 3. Click Connect
 
-Currently it does not support streaming, chunking or a jailbreak (I recommend using a jailbroken bot or creating one yourself).
+Currently it does not support chunking or a jailbreak (I recommend using a jailbroken bot or creating one yourself).
 I did not test if it works on android devices.
