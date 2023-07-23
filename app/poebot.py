@@ -1,10 +1,13 @@
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium_stealth import stealth
 import markdownify
+import time
 
-class ChatBot:
+class PoeBot:
     def start_driver(self, p_b_cookie, bot_name):
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")
@@ -44,7 +47,13 @@ class ChatBot:
 
     def send_message(self, message):
         text_area = self.driver.find_element(By.CLASS_NAME, "GrowingTextArea_textArea__eadlu")
-        text_area.send_keys(message)
+        chunk_size = 2000
+        delay = 0.1
+        chunks = [message[i:i + chunk_size] for i in range(0, len(message), chunk_size)]
+
+        for chunk in chunks:
+            text_area.send_keys(chunk)
+            time.sleep(delay)
         text_area.send_keys(Keys.RETURN)
 
     def clear_context(self):

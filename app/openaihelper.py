@@ -35,7 +35,7 @@ class OpenAIHelper:
             formatted_messages.append(formatted_messages.pop(0))
 
         single_message = "  ".join(formatted_messages)
-        return single_message.replace("\n", "")
+        return single_message.replace("\n", " ")
     
     def send_message(self, messages):
         self.bot.clear_context()

@@ -1,14 +1,18 @@
 from flask import Flask, request, Response
-from chatbot import ChatBot
+from poebot import PoeBot
 from openaihelper import OpenAIHelper
 import json
 #import logging
 
 app = Flask(__name__)
 
-bot = ChatBot()
+bot = PoeBot()
 
 oai_helper = OpenAIHelper(bot)
+
+current_bot = None
+current_cookie = None
+
 #logging.basicConfig(level=logging.DEBUG)
 
 @app.route("/v2/driver/sage/chat/completions", methods=["POST"])
@@ -27,9 +31,12 @@ def chat_completions():
 
 @app.route("/v2/driver/sage/models", methods=["GET"])
 def models():
+    global current_bot, current_cookie
     p_b_cookie, bot_name = request.authorization.token.split('|', 1)
-    
-    bot.start_driver(p_b_cookie, bot_name)
+    if bot_name != current_bot or p_b_cookie != current_cookie:
+        bot.start_driver(p_b_cookie, bot_name)
+        current_bot = bot_name
+        current_cookie = p_b_cookie
     return {
         "id" : "1"
     }
