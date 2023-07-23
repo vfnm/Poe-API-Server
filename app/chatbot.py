@@ -5,7 +5,9 @@ from selenium_stealth import stealth
 import markdownify
 
 class ChatBot:
-    def start_driver(self, p_b_cookie, bot_name):
+    def init(self):
+        self.alt_send = False
+    def start_driver(self, p_b_cookie, bot_name, alt_send):
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -30,6 +32,8 @@ class ChatBot:
         self.driver.get(f"https://poe.com/")
         self.driver.add_cookie({"name": "p-b", "value": p_b_cookie})
         self.driver.get(f"https://poe.com/{bot_name}")
+        self.bot_name = bot_name
+        self.alt_send = alt_send
 
     def get_latest_message(self):
         bot_messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]//div[contains(@class, "Markdown_markdownContainer__UyYrv")]')
@@ -54,7 +58,7 @@ class ChatBot:
 
     def is_generating(self):
         stop_button_elements = self.driver.find_elements(By.CLASS_NAME, "ChatStopMessageButton_stopButton__LWNj6")
-        return len(stop_button_elements) > 0
+        return len(stop_button_elements) > 0 or len(self.get_latest_message()) < 10
     
     def get_suggestions(self):
         suggestions_container = self.driver.find_elements(By.CLASS_NAME, "ChatMessageSuggestedReplies_suggestedRepliesContainer__JgW12")
@@ -66,6 +70,22 @@ class ChatBot:
     def kill_driver(self):
         if hasattr(self, "driver"):
             self.driver.quit()
+    def edit_bot_prompt(self, prompt):
+        self.driver.get(f"https://poe.com/edit_bot?bot={self.bot_name}")
+        text_area = self.driver.find_element(By.NAME, "prompt")
+        save_button = self.driver.find_element(By.XPATH, "//button[text()='Save']")
+        text_area.clear()
+        text_area.send_keys(prompt)
+        save_button.click()
+        self.driver.get(f"https://poe.com/{self.bot_name}")
+    def edit_bot_intro(self, prompt):
+        self.driver.get(f"https://poe.com/edit_bot?bot={self.bot_name}")
+        text_area = self.driver.find_element(By.NAME, "introduction")
+        save_button = self.driver.find_element(By.XPATH, "//button[text()='Save']")
+        text_area.clear()
+        text_area.send_keys(prompt)
+        save_button.click()
+        self.driver.get(f"https://poe.com/{self.bot_name}")
 
     def __del__(self):
         if hasattr(self, "driver"):

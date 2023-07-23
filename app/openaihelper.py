@@ -23,9 +23,15 @@ class OpenAIHelper:
             formatted_messages.append(formatted_messages.pop(0))
 
         single_message = "  ".join(formatted_messages)
-
-        self.bot.clear_context()
-        self.bot.send_message(single_message.replace("\n", ""))
+        single_message = single_message.replace("\n", "")
+        if self.bot.alt_send:
+            self.bot.edit_bot_prompt(single_message)
+            time.sleep(0.5)
+            self.bot.clear_context()
+            self.bot.send_message("Do")
+        else:
+            self.bot.clear_context()
+            self.bot.send_message(single_message)
 
         time.sleep(3)
 
