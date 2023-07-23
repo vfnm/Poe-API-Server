@@ -58,7 +58,7 @@ class ChatBot:
 
     def is_generating(self):
         stop_button_elements = self.driver.find_elements(By.CLASS_NAME, "ChatStopMessageButton_stopButton__LWNj6")
-        return len(stop_button_elements) > 0 or len(self.get_latest_message()) < 10
+        return len(stop_button_elements) > 0
     
     def get_suggestions(self):
         suggestions_container = self.driver.find_elements(By.CLASS_NAME, "ChatMessageSuggestedReplies_suggestedRepliesContainer__JgW12")
@@ -85,6 +85,8 @@ class ChatBot:
         text_area.clear()
         text_area.send_keys(prompt)
         save_button.click()
+        self.driver.get(f"https://poe.com/{self.bot_name}")
+    def reload(self):
         self.driver.get(f"https://poe.com/{self.bot_name}")
 
     def __del__(self):

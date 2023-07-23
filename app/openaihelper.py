@@ -4,6 +4,7 @@ import time
 class OpenAIHelper:
     def __init__(self, bot):
         self.bot = bot
+        self.triggerWords = ["cum", "sex", "boobs"]
     
     def generate_id(self, prefix='chatcmpl-'):
         unique_id = uuid.uuid4()
@@ -17,6 +18,7 @@ class OpenAIHelper:
             name = message.get('name', '')
             content = message.get('content', '')
             formatted_msg = f"{role if not name else name}: {content}"
+
             formatted_messages.append(formatted_msg)
         
         if formatted_messages:
@@ -37,8 +39,11 @@ class OpenAIHelper:
 
         checks = 0
         while checks < 120:
-            if not self.bot.is_generating() and self.bot.get_latest_message() != '':
-                break
+            if not self.bot.is_generating():
+                self.bot.reload()
+                last_msg = self.bot.get_latest_message()
+                if last_msg != None and len(last_msg) >= 10:
+                    break
             checks += 1
             time.sleep(1)
         
