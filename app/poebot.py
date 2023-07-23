@@ -1,6 +1,4 @@
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium_stealth import stealth
@@ -34,7 +32,7 @@ class PoeBot:
         self.driver.get(f"https://poe.com/{bot_name}")
 
     def get_latest_message(self):
-        bot_messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]//div[contains(@class, "Markdown_markdownContainer__UyYrv")]')
+        bot_messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]')
         if bot_messages:
             latest_message = bot_messages[-1]
             return markdownify.markdownify(latest_message.get_attribute('innerHTML'), heading_style="ATX")

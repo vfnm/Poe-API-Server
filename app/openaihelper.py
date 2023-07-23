@@ -41,7 +41,7 @@ class OpenAIHelper:
         self.bot.clear_context()
         time.sleep(1)
         self.bot.send_message(self.format_message(messages))
-        time.sleep(3)
+        time.sleep(5)
 
     def generate_completions(self, messages):
         self.send_message(messages)
