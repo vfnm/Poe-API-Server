@@ -30,11 +30,15 @@ Installation guide:
 1. Install it with 'docker compose up'
 2. Wait until it's running and listening (by default to 0.0.0.0:5000)
 
+For Windows you can alternatively also use the release version.
+
 Use with SillyTavern:
 1. Select Chat Completion API
-2. Open the settings and enter 'http://[IP:Port]/v2/driver/sage' in 'Alternative server URL'. Replace IP and port with the real value
-2. Go to the connection tab and enter your 'p_b_cookie' and 'bot_name' in 'OpenAI API key', using this format: p_b_cookie|bot_name
-3. Click Connect
+2. Open the settings and enter 'http://IP:Port/v2/driver/sage' in 'Alternative server URL'. Replace IP and port with the real value
+3. Go to the connection tab and enter your 'p_b_cookie' and 'bot_name' in 'OpenAI API key', using this format: p_b_cookie|bot_name
+4. Activate streaming for a better experience
+4. Click Connect
 
 Currently it does not support chunking or a jailbreak (I recommend using a jailbroken bot or creating one yourself).
-I did not test if it works on android devices.
+
+It can also run on Termux.
