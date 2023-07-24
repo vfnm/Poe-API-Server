@@ -31,9 +31,13 @@ class OpenAIHelper:
             content = message.get('content', '')
             formatted_msg = f"{role if not name else name}: {content}"
             formatted_messages.append(formatted_msg)
-        if formatted_messages:
-            formatted_messages.append(formatted_messages.pop(0))
 
+        if formatted_messages:
+            first_message_parts = formatted_messages[0].split('\n\n', 1)
+        if len(first_message_parts) > 1:
+            formatted_messages[0] = first_message_parts[1]
+            formatted_messages.append(first_message_parts[0])
+            
         single_message = "  ".join(formatted_messages)
         return single_message.replace("\n", " ")
     
