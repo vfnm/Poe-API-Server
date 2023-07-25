@@ -6,7 +6,7 @@ It can simulate an OpenAI Proxy and be used with SillyTavern.
 Main API Endpoints:
 
     GET /latest-message
-    Returns the bot's latest message, message generation status, and suggestions if they exist. Returns an empty string if the last message is not from the bot
+    Returns the bot's latest message, message generation status, and suggestions if they exist
 
     POST /send-message
     Sends a message. Requires 'message', can optionally clear the context with 'clear_context' = true
@@ -36,9 +36,8 @@ Use with SillyTavern:
 1. Select Chat Completion API
 2. Open the settings and enter 'http://IP:Port/v2/driver/sage' in 'Alternative server URL'. Replace IP and port with the real value
 3. Go to the connection tab and enter your 'p_b_cookie' and 'bot_name' in 'OpenAI API key', using this format: p_b_cookie|bot_name
-4. Activate streaming for a better experience
 4. Click Connect
-
-Currently it does not support chunking or a jailbreak (I recommend using a jailbroken bot or creating one yourself).
+5. I recommend to activate streaming in the SillyTavern settings and to put this string in the main prompt: [Character=={{char}}] [User=={{user}}]
+6. If you want to use the Claude Jailbreak, you also need to add this string: [ClaudeJB]
 
 It can also run on Termux.
