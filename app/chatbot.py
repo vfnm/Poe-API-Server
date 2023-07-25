@@ -1,7 +1,11 @@
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium_stealth import stealth
+import pyperclip
+import time
+from threading import Thread
 import markdownify
 
 class ChatBot:
@@ -20,6 +24,7 @@ class ChatBot:
         options.add_argument('--disable-dev-shm-usage')
 
         self.driver = webdriver.Chrome(options=options)
+
         stealth(self.driver,
         languages=["en-US", "en"],
         vendor="Google Inc.",
@@ -50,7 +55,7 @@ class ChatBot:
     def send_message(self, message):
         text_area = self.driver.find_element(By.CLASS_NAME, "GrowingTextArea_textArea__eadlu")
         text_area.send_keys(message)
-        text_area.send_keys(Keys.RETURN)
+        text_area.send_keys(Keys.ENTER)
 
     def clear_context(self):
         clear_button = self.driver.find_element(By.CLASS_NAME, "ChatBreakButton_button__EihE0")
@@ -74,16 +79,16 @@ class ChatBot:
         self.driver.get(f"https://poe.com/edit_bot?bot={self.bot_name}")
         text_area = self.driver.find_element(By.NAME, "prompt")
         save_button = self.driver.find_element(By.XPATH, "//button[text()='Save']")
-        text_area.clear()
-        text_area.send_keys(prompt)
+        self.driver.execute_script(f'document.getElementsByName("prompt")[0].value=arguments[0];', prompt)
+        text_area.send_keys(Keys.RETURN)
         save_button.click()
         self.driver.get(f"https://poe.com/{self.bot_name}")
     def edit_bot_intro(self, prompt):
         self.driver.get(f"https://poe.com/edit_bot?bot={self.bot_name}")
         text_area = self.driver.find_element(By.NAME, "introduction")
         save_button = self.driver.find_element(By.XPATH, "//button[text()='Save']")
-        text_area.clear()
-        text_area.send_keys(prompt)
+        self.driver.execute_script(f'document.getElementsByName("introduction")[0].value=arguments[0];', prompt)
+        text_area.send_keys(Keys.RETURN)
         save_button.click()
         self.driver.get(f"https://poe.com/{self.bot_name}")
     def reload(self):

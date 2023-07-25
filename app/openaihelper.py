@@ -12,6 +12,8 @@ class OpenAIHelper:
         return f"{prefix}{unique_id_str}"
     
     def generate_completions(self, messages):
+        start_time = time.time()
+        print(1, 0)
         formatted_messages = []
         for message in messages:
             role = message.get('role', 'Unknown')
@@ -23,9 +25,10 @@ class OpenAIHelper:
         
         if formatted_messages:
             formatted_messages.append(formatted_messages.pop(0))
-
+        print(2, time.time() - start_time)
         single_message = "  ".join(formatted_messages)
         single_message = single_message.replace("\n", "")
+        print(3, time.time() - start_time)
         if self.bot.alt_send:
             self.bot.edit_bot_prompt(single_message)
             time.sleep(0.5)
@@ -34,7 +37,7 @@ class OpenAIHelper:
         else:
             self.bot.clear_context()
             self.bot.send_message(single_message)
-
+        print(4, time.time() - start_time)
         time.sleep(3)
 
         checks = 0
@@ -46,8 +49,6 @@ class OpenAIHelper:
                     last_msg = self.bot.get_latest_message()
                     if last_msg != None and len(last_msg) >= 10:
                         break
-                else:
-                    print("Got ya")
             checks += 1
             time.sleep(1)
         
@@ -67,5 +68,8 @@ class OpenAIHelper:
                 }
             ]
         }
+        print(5, time.time() - start_time)
         
         return response
+
+# pyinstaller --paths C:\Users\konob\PycharmProjects\mineBet\venv\Lib\site-packages --paths C:\Users\konob\AppData\Local\Programs\Python\Python39\Lib\site-packages --collect-data selenium_stealth app.py
