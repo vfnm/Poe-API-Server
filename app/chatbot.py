@@ -3,9 +3,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium_stealth import stealth
-import pyperclip
 import time
-from threading import Thread
 import markdownify
 
 class ChatBot:

@@ -4,7 +4,6 @@ import time
 class OpenAIHelper:
     def __init__(self, bot):
         self.bot = bot
-        self.triggerWords = ["cum", "sex", "boobs"]
     
     def generate_id(self, prefix='chatcmpl-'):
         unique_id = uuid.uuid4()
@@ -27,7 +26,7 @@ class OpenAIHelper:
             formatted_messages.append(formatted_messages.pop(0))
         print(2, time.time() - start_time)
         single_message = "  ".join(formatted_messages)
-        single_message = single_message.replace("\n", "")
+        single_message = single_message.replace("\n", ". ")
         print(3, time.time() - start_time)
         if self.bot.alt_send:
             self.bot.edit_bot_prompt(single_message)
