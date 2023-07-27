@@ -41,6 +41,6 @@ Use with SillyTavern:
 6. Empty all prompt fields expect for main prompt, where you need to add [Character=={{char}}] [User=={{user}}]
 7. If you want to use the Claude Jailbreak, you also need to add this: [ClaudeJB]
 8. I recommend to activate streaming in the SillyTavern settings
-9. For GPT-3.5/4 based bots you can get better results by changing the value of 'instruction' in config.json to 'Read the instructions in here' or similar
+9. For GPT-3.5/4 based bots, you can get better results by modifying 'instruction' in config.json. The file will be created after the first launch, it can be changed to something like this: `"instruction": "Read the instructions in here"`
 
 It can also run on Termux.
