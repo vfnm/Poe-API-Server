@@ -37,7 +37,10 @@ Use with SillyTavern:
 2. Open the settings and enter 'http://IP:Port/v2/driver/sage' in 'Alternative server URL'. Replace IP and port with the real value
 3. Go to the connection tab and enter your 'p_b_cookie' and 'bot_name' in 'OpenAI API key', using this format: p_b_cookie|bot_name
 4. Click Connect
-5. I recommend to activate streaming in the SillyTavern settings and to put this string in the main prompt: [Character=={{char}}] [User=={{user}}]
-6. If you want to use the Claude Jailbreak, you also need to add this string: [ClaudeJB]
+5. Set the 'Context Size (tokens)' to '2048' unless you use Claude-100K, ChatGPT-16K or GPT-4-32K
+6. Empty all prompt fields expect for main prompt, where you need to add [Character=={{char}}] [User=={{user}}]
+7. If you want to use the Claude Jailbreak, you also need to add this: [ClaudeJB]
+8. I recommend to activate streaming in the SillyTavern settings
+9. For GPT-3.5/4 based bots you can get better results by changing the value of 'instruction' in config.json to 'Read the instructions in here' or similar
 
 It can also run on Termux.

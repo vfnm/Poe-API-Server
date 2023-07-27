@@ -5,14 +5,29 @@ from selenium_stealth import stealth
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
-import markdownify
-import time
-import secrets
-import string
-import os, glob
+from functools import wraps
+from selenium.common.exceptions import WebDriverException
+import markdownify, time, secrets, string, os, glob
+from config import config
+
+def handle_errors(func):
+    @wraps(func)
+    def wrapped_func(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except WebDriverException as e:
+            print(f"An error occurred: {e}")
+            time.sleep(10)
+            self.start_driver()
+    return wrapped_func
 
 class PoeBot:
-    def start_driver(self, p_b_cookie, bot_name):
+    def __init__(self):
+        self.start_driver()
+
+    def start_driver(self):
+        if (config["cookie"] is None or config["bot"] is None):
+            return
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -34,17 +49,20 @@ class PoeBot:
         renderer="Intel Iris OpenGL Engine",
         fix_hairline=True,
         )
-        self.driver.get(f"https://poe.com/")
-        self.driver.add_cookie({"name": "p-b", "value": p_b_cookie})
-        self.driver.get(f"https://poe.com/{bot_name}")
-
+        self.driver.get("https://poe.com/login?redirect_url=%2F")
+        time.sleep(1)
+        self.driver.add_cookie({"name": "p-b", "value": config['cookie']})
+        self.driver.get(f"https://poe.com/{config['bot']}")
+    
     def get_latest_message(self):
         bot_messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]')
         if bot_messages:
             latest_message = bot_messages[-1]
             if (latest_message.text == "..."):
                 return None
-            return markdownify.markdownify(latest_message.get_attribute("innerHTML"), heading_style="ATX")
+            msg = markdownify.markdownify(latest_message.get_attribute("innerHTML"), heading_style="ATX")
+            msg = msg.replace("\*", "*")
+            return msg
         else:
             return None
     
@@ -53,7 +71,29 @@ class PoeBot:
         if abort_button:
             abort_button[0].click()
 
+    @handle_errors
     def send_message(self, message):
+        if (len(message) > 200):
+            self.send_message_as_file(message)
+        else:
+            self.send_message_as_text(message)
+        time.sleep(1)
+        start_time = time.time()
+        while True:
+            bot_messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]')
+            if bot_messages:
+                latest_message = bot_messages[-1].text
+            if latest_message != "...":
+                break
+            if (self.driver.find_elements(By.XPATH, "//div[@data-visible='true' and contains(@class, 'Message_humanOptimisticFooter__zm1hu') and text()='Message failed to send.']")):
+                self.reload()
+                raise Exception("Error with Poe")
+            if time.time() - start_time > 120:
+                raise Exception("Timeout waiting for bot message")
+            time.sleep(1)
+
+    @handle_errors
+    def send_message_as_file(self, message):
         filename_length = secrets.randbelow(8) + 9
         filename = ''.join(secrets.choice(string.ascii_letters + string.digits) for i in range(filename_length))
 
@@ -68,20 +108,18 @@ class PoeBot:
         file_input.send_keys(absolute_path)
         
         text_area = self.driver.find_element(By.CLASS_NAME, "GrowingTextArea_textArea__eadlu")
-        text_area.send_keys("-")
+        text_area.send_keys(config.get("instruction", "-"))
         text_area.send_keys(Keys.RETURN)
-        time.sleep(2)
-        start_time = time.time()
-        while True:
-            bot_messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]')
-            if bot_messages:
-                latest_message = bot_messages[-1].text
-            if latest_message != "...":
-                break
-            if time.time() - start_time > 120:
-                raise Exception("Timeout waiting for bot message")
-            time.sleep(1)
+    
+    @handle_errors
+    def send_message_as_text(self, message):
+        text_area = self.driver.find_element(By.CLASS_NAME, "GrowingTextArea_textArea__eadlu")
+        message = message.replace("\n", "")
+        text_area.send_keys(message)
+        text_area.send_keys(Keys.RETURN)
 
+
+    @handle_errors
     def clear_context(self):
         clear_button = self.driver.find_element(By.CLASS_NAME, "ChatBreakButton_button__EihE0")
         clear_button.click()
@@ -90,6 +128,7 @@ class PoeBot:
         stop_button_elements = self.driver.find_elements(By.CLASS_NAME, "ChatStopMessageButton_stopButton__LWNj6")
         return len(stop_button_elements) > 0
     
+    @handle_errors
     def get_suggestions(self):
         suggestions_container = self.driver.find_elements(By.CLASS_NAME, "ChatMessageSuggestedReplies_suggestedRepliesContainer__JgW12")
         if not suggestions_container:
@@ -97,6 +136,7 @@ class PoeBot:
         suggestion_buttons = suggestions_container[0].find_elements(By.TAG_NAME, "button")
         return [button.text for button in suggestion_buttons]
     
+    @handle_errors
     def delete_latest_message(self):
         bot_messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]')
         latest_message = bot_messages[-1]
@@ -121,3 +161,5 @@ class PoeBot:
     def __del__(self):
         if hasattr(self, "driver"):
             self.kill_driver()
+
+    

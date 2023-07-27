@@ -1,7 +1,8 @@
 from flask import Flask, request, Response
 from poebot import PoeBot
 from openaihelper import OpenAIHelper
-import json
+from config import config
+import json, os, socket
 #import logging
 
 app = Flask(__name__)
@@ -9,9 +10,6 @@ app = Flask(__name__)
 bot = PoeBot()
 
 oai_helper = OpenAIHelper(bot)
-
-current_bot = None
-current_cookie = None
 
 #logging.basicConfig(level=logging.DEBUG)
 
@@ -31,12 +29,11 @@ def chat_completions():
 
 @app.route("/v2/driver/sage/models", methods=["GET"])
 def models():
-    global current_bot, current_cookie
     p_b_cookie, bot_name = request.authorization.token.split('|', 1)
-    if bot_name != current_bot or p_b_cookie != current_cookie:
-        bot.start_driver(p_b_cookie, bot_name)
-        current_bot = bot_name
-        current_cookie = p_b_cookie
+    if bot_name != config["bot"] or p_b_cookie != config["cookie"]:
+        config["bot"] = bot_name
+        config["cookie"] = p_b_cookie
+        bot.start_driver()
     return {
         "id" : "1"
     }
@@ -85,4 +82,4 @@ def is_generating():
     return {"is_generating": bot.is_generating()}
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host=config.get("host", "0.0.0.0"), port=config.get("port", 5000))
