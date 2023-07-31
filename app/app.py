@@ -2,7 +2,7 @@ from flask import Flask, request, Response
 from poebot import PoeBot
 from openaihelper import OpenAIHelper
 from config import config
-import json, os, socket
+import json
 #import logging
 
 app = Flask(__name__)

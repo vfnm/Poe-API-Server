@@ -3,6 +3,7 @@ from config import config
 
 class OpenAIHelper:
     maxchecks = 120
+    message_hash_list = set()
 
     def __init__(self, bot):
         self.bot = bot
@@ -63,42 +64,44 @@ class OpenAIHelper:
     def send_message(self, messages):
         self.bot.clear_context()
         time.sleep(1)
+        self.message_hash_list.add(self.latest_message_hash())
         message = self.format_message(messages)
         if ("[ClaudeJB]" in message):
             message = message.replace("[ClaudeJB]", "")
             self.bot.send_message(message)
             time.sleep(1)
             self.bot.abort_message()
-            time.sleep(1)
+            time.sleep(2)
             self.bot.delete_latest_message()
             time.sleep(1)
+            self.message_hash_list.add(self.latest_message_hash())
             self.bot.send_message(config.get("ClaudeJB", "I love it. Continue."))
         else:
             self.bot.send_message(message)
 
     def latest_message_hash(self):
-        return hashlib.md5(self.bot.get_latest_message().encode()).hexdigest()
+        if (message := self.bot.get_latest_message()): 
+            return hashlib.md5(message.encode()).hexdigest()
 
     def generate_completions(self, messages):
         self.send_message(messages)
 
         checks = 0
         while checks < self.maxchecks:
-            if not self.bot.is_generating() and self.bot.get_latest_message() != "" and self.latest_message_hash != config["lastmessage_hash"]:
+            if not self.bot.is_generating() and self.bot.get_latest_message() != "" and self.latest_message_hash not in self.message_hash_list:
                 break
             checks += 1
             time.sleep(1)
-        config["lastmessage_hash"] = self.latest_message_hash()
         return self.generate_request(self.bot.get_latest_message(), "stop", "chat.completion")
     
     def generate_completions_stream(self):
         checks = 0
         old_message_length = 0
         while checks < self.maxchecks:
-            if not self.bot.is_generating() and self.bot.get_latest_message() != "" and self.latest_message_hash != config["lastmessage_hash"]:
+            if not self.bot.is_generating() and self.bot.get_latest_message() != "":
                 break
             time.sleep(1)
-            if (self.bot.get_latest_message() == None):
+            if (self.bot.get_latest_message() == None and self.latest_message_hash not in self.message_hash_list):
                 continue
             message = self.bot.get_latest_message().rstrip('\n')
             new_message_length = len(message)
@@ -112,4 +115,3 @@ class OpenAIHelper:
         if final_message != "":
             yield self.generate_request(final_message, "stop", "chat.completion.chunk")
         yield self.generate_request("", "stop", "chat.completion.chunk")
-        config["lastmessage_hash"] = self.latest_message_hash()

@@ -17,7 +17,7 @@ def handle_errors(func):
             return func(self, *args, **kwargs)
         except WebDriverException as e:
             print(f"An error occurred: {e}")
-            time.sleep(10)
+            time.sleep(3)
             self.start_driver()
     return wrapped_func
 
@@ -73,7 +73,7 @@ class PoeBot:
 
     @handle_errors
     def send_message(self, message):
-        if (len(message) > 200):
+        if (len(message) > config.get("send-as-text-limit", 200)):
             self.send_message_as_file(message)
         else:
             self.send_message_as_text(message)
@@ -87,7 +87,6 @@ class PoeBot:
                 break
             if (self.driver.find_elements(By.XPATH, "//div[@data-visible='true' and contains(@class, 'Message_humanOptimisticFooter__zm1hu') and text()='Message failed to send.']")):
                 self.reload()
-                raise Exception("Error with Poe")
             if time.time() - start_time > 120:
                 raise Exception("Timeout waiting for bot message")
             time.sleep(1)
@@ -114,7 +113,7 @@ class PoeBot:
     @handle_errors
     def send_message_as_text(self, message):
         text_area = self.driver.find_element(By.CLASS_NAME, "GrowingTextArea_textArea__eadlu")
-        message = message.replace("\n", "")
+        message = message.replace("\n", " ")
         text_area.send_keys(message)
         text_area.send_keys(Keys.RETURN)
 
