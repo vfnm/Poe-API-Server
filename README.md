@@ -42,5 +42,6 @@ Use with SillyTavern:
 7. If you want to use the Claude Jailbreak, you also need to add this: [ClaudeJB]
 8. I recommend to activate streaming in the SillyTavern settings
 9. For GPT-3.5/4 based bots, you can get better results by modifying 'instruction' in config.json. The file will be created after the first launch, it can be changed to something like this: `"instruction": "Read the instructions in here"`
+10. If you have a problem with the message being sent as a file, you can disable this by modifying 'send-as-text-limit' in config.json, for example to `"send-as-text-limit": 99999`
 
 It can also run on Termux.
