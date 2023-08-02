@@ -2,6 +2,7 @@ from flask import Flask, request, Response
 from poebot import PoeBot
 from openaihelper import OpenAIHelper
 from config import config
+from urllib.request import urlopen
 import json
 #import logging
 
@@ -12,6 +13,13 @@ bot = PoeBot()
 oai_helper = OpenAIHelper(bot)
 
 #logging.basicConfig(level=logging.DEBUG)
+
+current_version = "0.5"
+latest_version = json.loads(urlopen("https://api.github.com/repos/vfnm/Poe-API-Server/releases/latest").read())["tag_name"]
+if (current_version != latest_version):
+    print(f"You are running Poe API Server version {current_version} while the latest release is version {latest_version}")
+else:
+    print(f"Poe API Server {current_version} by vfnm is up to date")
 
 @app.route("/v2/driver/sage/chat/completions", methods=["POST"])
 def chat_completions():

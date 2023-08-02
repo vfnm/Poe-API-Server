@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from functools import wraps
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, TimeoutException
 import markdownify, time, secrets, string, os, glob
 from config import config
 
@@ -54,6 +54,7 @@ class PoeBot:
         self.driver.add_cookie({"name": "p-b", "value": config['cookie']})
         self.driver.get(f"https://poe.com/{config['bot']}")
     
+    @handle_errors
     def get_latest_message(self):
         bot_messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]')
         if bot_messages:
@@ -66,10 +67,12 @@ class PoeBot:
         else:
             return None
     
+    @handle_errors
     def abort_message(self):
-        abort_button = self.driver.find_elements(By.CLASS_NAME, "ChatStopMessageButton_stopButton__LWNj6")
-        if abort_button:
-            abort_button[0].click()
+        try:
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "ChatStopMessageButton_stopButton__LWNj6"))).click()
+        except TimeoutException:
+            return
 
     @handle_errors
     def send_message(self, message):
@@ -147,7 +150,7 @@ class PoeBot:
         confirm1_button = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".Button_buttonBase__0QP_m.Button_danger__zI3OH")))
         ActionChains(self.driver).move_to_element(confirm1_button).click().perform()
 
-        confirm2_button = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(((By.XPATH, "//button[@class='Button_buttonBase__0QP_m Button_danger__zI3OH']"))))
+        confirm2_button = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(((By.XPATH, "//button[@class='Button_buttonBase__0QP_m Button_primaryDanger__IlN8P']"))))
         ActionChains(self.driver).move_to_element(confirm2_button).click().perform()
     
     def reload(self):

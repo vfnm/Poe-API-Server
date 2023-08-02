@@ -2,7 +2,7 @@ import time, re, hashlib
 from config import config
 
 class OpenAIHelper:
-    maxchecks = 120
+    maxchecks = 240
     message_hash_list = set()
 
     def __init__(self, bot):
@@ -69,9 +69,7 @@ class OpenAIHelper:
         if ("[ClaudeJB]" in message):
             message = message.replace("[ClaudeJB]", "")
             self.bot.send_message(message)
-            time.sleep(1)
             self.bot.abort_message()
-            time.sleep(2)
             self.bot.delete_latest_message()
             time.sleep(1)
             self.message_hash_list.add(self.latest_message_hash())
@@ -88,7 +86,7 @@ class OpenAIHelper:
 
         checks = 0
         while checks < self.maxchecks:
-            if not self.bot.is_generating() and self.bot.get_latest_message() != "" and self.latest_message_hash not in self.message_hash_list:
+            if not self.bot.is_generating() and self.bot.get_latest_message() != "" and self.latest_message_hash() not in self.message_hash_list:
                 break
             checks += 1
             time.sleep(1)
@@ -101,8 +99,10 @@ class OpenAIHelper:
             if not self.bot.is_generating() and self.bot.get_latest_message() != "":
                 break
             time.sleep(1)
-            if (self.bot.get_latest_message() == None and self.latest_message_hash not in self.message_hash_list):
+            
+            if (self.bot.get_latest_message() == None or self.latest_message_hash() in self.message_hash_list):
                 continue
+            
             message = self.bot.get_latest_message().rstrip('\n')
             new_message_length = len(message)
             new_message = message[old_message_length:new_message_length]
