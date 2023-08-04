@@ -29,9 +29,10 @@ class PoeBot:
         if (config["cookie"] is None or config["bot"] is None):
             return
         options = webdriver.ChromeOptions()
-        options.add_argument("--headless")
+        #options.add_argument("--headless")
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
+        options.add_argument('--ignore-certificate-errors')
         options.add_argument('--disable-blink-features=AutomationControlled')
         options.add_argument('--disable-popup-blocking')
         options.add_argument('--start-maximized')
@@ -50,9 +51,14 @@ class PoeBot:
         fix_hairline=True,
         )
         self.driver.get("https://poe.com/login?redirect_url=%2F")
-        time.sleep(1)
         self.driver.add_cookie({"name": "p-b", "value": config['cookie']})
-        self.driver.get(f"https://poe.com/{config['bot']}")
+        self.driver.execute_script('''window.open("https://poe.com/{}","_blank");'''.format(config['bot']))
+        
+        self.driver.switch_to.window(self.driver.window_handles[1])
+        self.driver.switch_to.window(self.driver.window_handles[0])
+        self.driver.close()
+        self.driver.switch_to.window(self.driver.window_handles[0])
+        
     
     @handle_errors
     def get_latest_message(self):
@@ -126,6 +132,7 @@ class PoeBot:
         clear_button = self.driver.find_element(By.CLASS_NAME, "ChatBreakButton_button__EihE0")
         clear_button.click()
 
+    @handle_errors
     def is_generating(self):
         stop_button_elements = self.driver.find_elements(By.CLASS_NAME, "ChatStopMessageButton_stopButton__LWNj6")
         return len(stop_button_elements) > 0
@@ -153,6 +160,7 @@ class PoeBot:
         confirm2_button = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(((By.XPATH, "//button[@class='Button_buttonBase__0QP_m Button_primaryDanger__IlN8P']"))))
         ActionChains(self.driver).move_to_element(confirm2_button).click().perform()
     
+    @handle_errors
     def reload(self):
         self.driver.refresh()
 
