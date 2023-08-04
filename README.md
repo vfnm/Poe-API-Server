@@ -15,13 +15,13 @@ For Windows you can alternatively also use the [release version](https://github.
 1. Select Chat Completion API
 2. Open the settings and enter 'http://IP:Port/v2/driver/sage' in 'Alternative server URL'. Replace IP and port with the real value
 3. Enter your 'p_b_cookie' and 'bot_name' in 'Proxy Password', using this format: p_b_cookie|bot_name
-4. Click Connect
 5. Set the 'Context Size (tokens)' to '2048' unless you use Claude-100K, ChatGPT-16K or GPT-4-32K
 6. Empty all prompt fields expect for main prompt, where you need to add [Character=={{char}}] [User=={{user}}]
 7. If you want to use the Claude Jailbreak, you also need to add this: [ClaudeJB]
-8. I recommend to activate streaming in the SillyTavern settings
-9. For GPT-3.5/4 based bots, you can get better results by modifying 'instruction' in config.json. The file will be created after the first launch, it can be changed to something like this: `"instruction": "Read the instructions in here"`
-10. If you have a problem with the message being sent as a file, you can disable this by modifying 'send-as-text-limit' in config.json, for example to `"send-as-text-limit": 99999`, this solves the issue with the bot keep asking for a prompt, which can somtimes happen with OpenAI based bots
+8. Activate streaming
+9. Close the settings and click connect
+10. For GPT-3.5/4 based bots, you can get better results by modifying 'instruction' in config.json. The file will be created after the first launch, it can be changed to something like this: `"instruction": "Read the instructions in here"`
+11. If you have a problem with the message being sent as a file, you can disable this by modifying 'send-as-text-limit' in config.json, for example to `"send-as-text-limit": 99999`, this solves the issue with the bot keep asking for a prompt, which can somtimes happen with OpenAI based bots
 
 It can also run on Termux.
 
