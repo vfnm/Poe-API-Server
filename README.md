@@ -21,7 +21,7 @@ For Windows you can alternatively also use the [release version](https://github.
 8. Activate streaming
 9. Close the settings and click connect
 10. For GPT-3.5/4 based bots, you can get better results by modifying 'instruction' in config.json. The file will be created after the first launch, it can be changed to something like this: `"instruction": "Read the instructions in here"`
-11. If you have a problem with the message being sent as a file, you can disable this by modifying 'send-as-text-limit' in config.json, for example to `"send-as-text-limit": 99999`, this solves the issue with the bot keep asking for a prompt, which can somtimes happen with OpenAI based bots
+11. If you have a problem with the message being sent as a file, you can disable this by modifying 'send-as-text-limit' in config.json, for example to `"send-as-text-limit": 99999`, this solves the issue with the bot keep asking for a prompt, which can sometimes happen with OpenAI based bots
 
 It can also run on Termux.
 

@@ -63,14 +63,15 @@ class OpenAIHelper:
         return "  ".join(formatted_messages)
     def send_message(self, messages):
         self.message_hash_list.add(self.latest_message_hash())
-        time.sleep(1)
         self.bot.clear_context()  
+        time.sleep(1)
         message = self.format_message(messages)
         if ("[ClaudeJB]" in message):
             message = message.replace("[ClaudeJB]", "")
             self.bot.send_message(message)
             self.bot.abort_message()
             time.sleep(1)
+            
             self.bot.delete_latest_message()
             time.sleep(2)
             self.message_hash_list.add(self.latest_message_hash())
@@ -102,10 +103,10 @@ class OpenAIHelper:
             if not self.bot.is_generating() and self.bot.get_latest_message() != "" and self.latest_message_hash() not in self.message_hash_list:
                 break
             time.sleep(1)
-            
-            if (self.bot.get_latest_message() == None or self.latest_message_hash() in self.message_hash_list):
+            message = self.bot.get_latest_message()
+            if (message == None or self.latest_message_hash() in self.message_hash_list):
                 continue
-            message = self.bot.get_latest_message().rstrip('\n')
+            message = message.rstrip('\n')
             new_message_length = len(message)
             new_message = message[old_message_length:new_message_length]
             old_message_length = new_message_length
