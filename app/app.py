@@ -14,7 +14,7 @@ oai_helper = OpenAIHelper(bot)
 
 #logging.basicConfig(level=logging.DEBUG)
 
-current_version = "0.7"
+current_version = "0.8"
 latest_version = json.loads(urlopen("https://api.github.com/repos/vfnm/Poe-API-Server/releases/latest").read())["tag_name"]
 if (current_version != latest_version):
     print(f"You are running Poe API Server version {current_version} while the latest release is version {latest_version}")

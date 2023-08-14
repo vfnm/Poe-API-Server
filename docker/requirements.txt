@@ -1,4 +1,4 @@
 flask
 selenium
 markdownify
-undetected-chromedriver
+undetected_chromedriver

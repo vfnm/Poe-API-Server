@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from functools import wraps
 from selenium.common.exceptions import WebDriverException, TimeoutException
-import markdownify, time, secrets, string, os, glob
+import markdownify, time, secrets, string, os, glob, hashlib
 from config import config
 import undetected_chromedriver as uc
 
@@ -18,10 +18,13 @@ def handle_errors(func):
         except WebDriverException as e:
             print(f"An error occurred: {e}")
             time.sleep(3)
+            self.kill_driver()
+            time.sleep(1)
             self.start_driver()
     return wrapped_func
 
 class PoeBot:
+    message_hash_list = set()
     def __init__(self):
         self.start_driver()
 
@@ -29,7 +32,7 @@ class PoeBot:
         if (config["cookie"] is None or config["bot"] is None):
             return
         options = webdriver.ChromeOptions()
-        self.driver = uc.Chrome(options=options, headless=True)
+        self.driver = uc.Chrome(options=options, headless=config.get("headless", True))
         self.driver.get("https://poe.com/login?redirect_url=%2F")
         self.driver.add_cookie({"name": "p-b", "value": config['cookie']})
         self.driver.get(f"https://poe.com/{config['bot']}")
@@ -51,27 +54,26 @@ class PoeBot:
     @handle_errors
     def abort_message(self):
         try:
-            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "ChatStopMessageButton_stopButton__LWNj6"))).click()
+            WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "ChatStopMessageButton_stopButton__LWNj6"))).click()
         except TimeoutException:
             return
 
     @handle_errors
     def send_message(self, message):
+        self.message_hash_list.add(self.latest_message_hash())
         if (len(message) > config.get("send-as-text-limit", 200)):
             self.send_message_as_file(message)
         else:
             self.send_message_as_text(message)
         time.sleep(1)
+        
         start_time = time.time()
         while True:
-            bot_messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]')
-            if bot_messages:
-                latest_message = bot_messages[-1].text
-            if latest_message != "...":
-                break
-            if (self.driver.find_elements(By.XPATH, "//div[@data-visible='true' and contains(@class, 'Message_humanOptimisticFooter__zm1hu') and text()='Message failed to send.']")):
-                self.reload()
+            latest_message = self.get_latest_message()
+            if latest_message and not self.latest_message_in_hashlist():
+                return
             if time.time() - start_time > 120:
+                self.reload
                 raise Exception("Timeout waiting for bot message")
             time.sleep(1)
 
@@ -106,6 +108,7 @@ class PoeBot:
     def clear_context(self):
         clear_button = self.driver.find_element(By.CLASS_NAME, "ChatBreakButton_button__EihE0")
         clear_button.click()
+        time.sleep(1)
 
     @handle_errors
     def is_generating(self):
@@ -121,20 +124,23 @@ class PoeBot:
         return [button.text for button in suggestion_buttons]
     
     @handle_errors
-    def delete_latest_message(self):
-        bot_messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]')
-        latest_message = bot_messages[-1]
+    def delete_latest_message(self, bot = True):
+        if (bot):
+            messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]')
+        else:
+            messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_humanMessageBubble__Nld4j")]')
+        latest_message = messages[-1]
         ActionChains(self.driver).context_click(latest_message).perform()
 
-        delete_button = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(((By.XPATH, "//button[starts-with(@class, 'DropdownMenuItem_item__nYv_0') and contains(., 'Delete...')]"))))
+        delete_button = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(((By.XPATH, "//button[starts-with(@class, 'DropdownMenuItem_item__nYv_0') and contains(., 'Delete...')]"))))
         ActionChains(self.driver).move_to_element(delete_button).click().perform()
 
-        confirm1_button = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".Button_buttonBase__0QP_m.Button_danger__zI3OH")))
+        confirm1_button = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".Button_buttonBase__0QP_m.Button_danger__zI3OH")))
         ActionChains(self.driver).move_to_element(confirm1_button).click().perform()
 
-        confirm2_button = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(((By.XPATH, "//button[@class='Button_buttonBase__0QP_m Button_primaryDanger__IlN8P']"))))
+        confirm2_button = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(((By.XPATH, "//button[@class='Button_buttonBase__0QP_m Button_primaryDanger__IlN8P']"))))
         ActionChains(self.driver).move_to_element(confirm2_button).click().perform()
-    
+
     @handle_errors
     def reload(self):
         self.driver.refresh()
@@ -147,4 +153,14 @@ class PoeBot:
         if hasattr(self, "driver"):
             self.kill_driver()
 
-    
+    def add_message_hash(self, hash):
+        if hash:
+            self.message_hash_list.add(hash)
+
+    def latest_message_hash(self):
+        return hashlib.md5(self.get_latest_message().encode()).hexdigest() if self.get_latest_message() else None
+        
+    def latest_message_in_hashlist(self):
+        hash = self.latest_message_hash()
+        if hash:
+            return hash in self.message_hash_list
