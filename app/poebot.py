@@ -54,12 +54,12 @@ class PoeBot:
     @handle_errors
     def abort_message(self):
         try:
-            WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "ChatStopMessageButton_stopButton__LWNj6"))).click()
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "ChatStopMessageButton_stopButton__LWNj6"))).click()
         except TimeoutException:
             return
 
     @handle_errors
-    def send_message(self, message):
+    def send_message(self, message, wait_for_message = True):
         self.message_hash_list.add(self.latest_message_hash())
         if (len(message) > config.get("send-as-text-limit", 200)):
             self.send_message_as_file(message)
@@ -68,7 +68,7 @@ class PoeBot:
         time.sleep(1)
         
         start_time = time.time()
-        while True:
+        while wait_for_message:
             latest_message = self.get_latest_message()
             if latest_message and not self.latest_message_in_hashlist():
                 return
@@ -129,6 +129,8 @@ class PoeBot:
             messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_botMessageBubble__CPGMI")]')
         else:
             messages = self.driver.find_elements(By.XPATH, '//div[contains(@class, "Message_humanMessageBubble__Nld4j")]')
+        if (len(messages) == 0):
+            return
         latest_message = messages[-1]
         ActionChains(self.driver).context_click(latest_message).perform()
 
@@ -138,7 +140,7 @@ class PoeBot:
         confirm1_button = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".Button_buttonBase__0QP_m.Button_danger__zI3OH")))
         ActionChains(self.driver).move_to_element(confirm1_button).click().perform()
 
-        confirm2_button = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(((By.XPATH, "//button[@class='Button_buttonBase__0QP_m Button_primaryDanger__IlN8P']"))))
+        confirm2_button = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(((By.XPATH, "//button[@class='Button_buttonBase__0QP_m Button_danger__zI3OH']"))))
         ActionChains(self.driver).move_to_element(confirm2_button).click().perform()
 
     @handle_errors

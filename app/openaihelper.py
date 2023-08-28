@@ -73,9 +73,11 @@ class OpenAIHelper:
             else:
                 self.bot.clear_context()
                 self.lastprompt = message
-                self.bot.send_message(message)
+                self.bot.send_message(message, False)
                 self.bot.abort_message()
+                time.sleep(0.5)
                 self.bot.delete_latest_message()
+                time.sleep(1)
                 self.bot.send_message(config.get("ClaudeJB", "I love it. Continue."))
         else:
             self.bot.clear_context()
