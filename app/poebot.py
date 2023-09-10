@@ -17,10 +17,11 @@ def handle_errors(func):
             return func(self, *args, **kwargs)
         except WebDriverException as e:
             print(f"An error occurred: {e}")
+            url = self.driver.current_url
             time.sleep(3)
             self.kill_driver()
             time.sleep(1)
-            self.start_driver()
+            self.start_driver(url)
     return wrapped_func
 
 class PoeBot:
@@ -28,14 +29,17 @@ class PoeBot:
     def __init__(self):
         self.start_driver()
 
-    def start_driver(self):
+    def start_driver(self, url = None):
         if (config["cookie"] is None or config["bot"] is None):
             return
         options = webdriver.ChromeOptions()
         self.driver = uc.Chrome(options=options, headless=config.get("headless", True))
         self.driver.get("https://poe.com/login?redirect_url=%2F")
         self.driver.add_cookie({"name": "p-b", "value": config['cookie']})
-        self.driver.get(f"https://poe.com/{config['bot']}")
+        if (url):
+            self.driver.get(url)
+        else:
+            self.driver.get(f"https://poe.com/{config['bot']}")
         
     
     @handle_errors
@@ -66,15 +70,18 @@ class PoeBot:
         else:
             self.send_message_as_text(message)
         time.sleep(1)
-        
+        if (config.get("autorefresh", True) == True):
+            self.driver.refresh()
+            time.sleep(1)
         start_time = time.time()
         while wait_for_message:
             latest_message = self.get_latest_message()
             if latest_message and not self.latest_message_in_hashlist():
                 return
             if time.time() - start_time > 120:
-                self.reload
-                raise Exception("Timeout waiting for bot message")
+                self.driver.refresh()
+                print("Timeout waiting for bot message")
+                return
             time.sleep(1)
 
     @handle_errors
@@ -142,11 +149,7 @@ class PoeBot:
 
         confirm2_button = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(((By.XPATH, "//button[@class='Button_buttonBase__0QP_m Button_danger__zI3OH']"))))
         ActionChains(self.driver).move_to_element(confirm2_button).click().perform()
-
-    @handle_errors
-    def reload(self):
-        self.driver.refresh()
-
+    
     def kill_driver(self):
         if hasattr(self, "driver"):
             self.driver.quit()
@@ -160,7 +163,8 @@ class PoeBot:
             self.message_hash_list.add(hash)
 
     def latest_message_hash(self):
-        return hashlib.md5(self.get_latest_message().encode()).hexdigest() if self.get_latest_message() else None
+        message = self.get_latest_message()
+        return hashlib.md5(message.encode()).hexdigest() if message else None
         
     def latest_message_in_hashlist(self):
         hash = self.latest_message_hash()

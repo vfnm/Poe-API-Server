@@ -54,13 +54,8 @@ class OpenAIHelper:
         
             formatted_msg = f"{role if not name else name}: {content}"
             formatted_messages.append(formatted_msg)
-        
-        if formatted_messages:
-            first_message_parts = formatted_messages[0].split("\n\n", 1)
-        if len(first_message_parts) > 1:
-            formatted_messages[0] = first_message_parts[1]
-            formatted_messages.append(first_message_parts[0])
-        return "  ".join(formatted_messages)
+        return "\n".join(formatted_messages)
+    
     def send_message(self, messages):
         message = self.format_message(messages)
         if ("[ClaudeJB]" in message):
