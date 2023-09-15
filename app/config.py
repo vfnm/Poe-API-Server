@@ -6,7 +6,7 @@ class Config:
         self.data = json.load(open(fn)) if os.path.isfile(fn) else {}
 
     def save(self):
-        json.dump(self.data, open(self.fn, "w"))
+        json.dump(self.data, open(self.fn, "w"), indent=4)
 
     def get(self, key, default=None):
         if key not in self.data:

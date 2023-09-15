@@ -33,7 +33,7 @@ class PoeBot:
         if (config["cookie"] is None or config["bot"] is None):
             return
         options = webdriver.ChromeOptions()
-        self.driver = uc.Chrome(options=options, headless=config.get("headless", True))
+        self.driver = uc.Chrome(options=options, headless=config.get("headless", False))
         self.driver.get("https://poe.com/login?redirect_url=%2F")
         self.driver.add_cookie({"name": "p-b", "value": config['cookie']})
         if (url):
@@ -73,6 +73,7 @@ class PoeBot:
         if (config.get("autorefresh", True) == True):
             self.driver.refresh()
             time.sleep(1)
+            self.driver.execute_script("var scrollElement = document.querySelector('.MainColumn_scrollSection__TuAiS.MainColumn_startAtBottom__Jb3v0');scrollElement.scrollTop = scrollElement.scrollHeight;")
         start_time = time.time()
         while wait_for_message:
             latest_message = self.get_latest_message()
